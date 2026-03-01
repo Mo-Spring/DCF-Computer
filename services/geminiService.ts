@@ -70,32 +70,49 @@ export const fetchCompanyData = async (query: string) => {
   `;
 
   return withRetry(async () => {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-      config: { tools: [{ googleSearch: {} }] },
-    });
-
-    const text = response.text || "";
-    // 尝试更宽泛的 JSON 匹配
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.log("AI Raw Response:", text);
-      throw new Error(text.length > 50 ? text.substring(0, 50) + "..." : "AI 未能按格式返回数据，可能未找到该公司信息。");
-    }
-    
     try {
-      const result = JSON.parse(jsonMatch[0]);
-      const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map(chunk => ({
-        title: chunk.web?.title || "官方披露",
-        uri: chunk.web?.uri || "#"
-      })) || [];
-
-      return { data: result, sources };
-    } catch (parseError) {
-      throw new Error("数据解析失败，请尝试更精确的公司全称。");
+      // 尝试带搜索工具的请求
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: prompt,
+        config: { tools: [{ googleSearch: {} }] },
+      });
+      return parseResponse(response);
+    } catch (error: any) {
+      // 如果报错包含 429 或搜索工具不可用，尝试不带搜索的降级方案
+      const isRateLimit = error.message?.includes("429") || error.status === 429;
+      if (isRateLimit) {
+        console.warn("搜索配额耗尽，正在尝试无搜索降级模式...");
+        const fallbackResponse = await ai.models.generateContent({
+          model: 'gemini-3-flash-preview',
+          contents: prompt + "\n注意：由于实时搜索配额受限，请基于你已有的知识库提供尽可能准确的数据。",
+        });
+        return parseResponse(fallbackResponse);
+      }
+      throw error;
     }
   });
+};
+
+// 提取解析逻辑为独立函数
+const parseResponse = (response: any) => {
+  const text = response.text || "";
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error(text.length > 50 ? text.substring(0, 50) + "..." : "AI 未能按格式返回数据。");
+  }
+  
+  try {
+    const result = JSON.parse(jsonMatch[0]);
+    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map((chunk: any) => ({
+      title: chunk.web?.title || "官方披露",
+      uri: chunk.web?.uri || "#"
+    })) || [];
+
+    return { data: result, sources };
+  } catch (parseError) {
+    throw new Error("数据解析失败，请尝试更精确的公司全称。");
+  }
 };
 
 export const getFinancialInsights = async (inputs: DCFInputs, results: DCFResult): Promise<string> => {
