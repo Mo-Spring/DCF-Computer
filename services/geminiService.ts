@@ -4,11 +4,23 @@ import { DCFInputs, DCFResult } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: "AIzaSyDVoOBSgZmf5lEYqQg_INj7wFESRI6iGmQ" });
 
-async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
-  try { return await fn(); } catch (error: any) {
+async function withRetry<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Promise<T> {
+  try { 
+    return await fn(); 
+  } catch (error: any) {
+    // 检查是否为 429 错误
+    const isRateLimit = error.message?.includes("429") || error.status === 429;
+    
     if (retries > 0) {
-      await new Promise(resolve => setTimeout(resolve, delay));
-      return withRetry(fn, retries - 1, delay * 2);
+      // 如果是频率限制，等待时间翻倍
+      const waitTime = isRateLimit ? delay * 2 : delay;
+      console.warn(`请求频率受限，${waitTime}ms 后重试... (剩余次数: ${retries})`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      return withRetry(fn, retries - 1, waitTime * 1.5);
+    }
+    
+    if (isRateLimit) {
+      throw new Error("API 请求达到上限（429）。请等待 1 分钟后再试，或检查 API Key 的配额。");
     }
     throw error;
   }
