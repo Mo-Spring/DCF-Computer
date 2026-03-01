@@ -1,0 +1,6 @@
+{
+  "appId": "com.dcfcalculator.app",
+  "appName": "DCF计算器",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

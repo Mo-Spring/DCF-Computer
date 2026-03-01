@@ -1,0 +1,5 @@
+{
+  "name": "DCF计算器",
+  "description": "智能现金流折现评估系统，支持AI财务审计与风险洞察。可打包为Android APK。",
+  "requestFramePermissions": []
+}
