@@ -24,7 +24,7 @@ export const fetchCompanyData = async (query: string) => {
     3. 单位标准化：将所有“总量”数据转换为“元”（Integer格式），绝对不要带“亿”或“万”。
     4. 计算：净负债 = 总有息债务 - 现金及等价物。
     
-    返回 JSON (必须严格遵守此格式)：
+    返回 JSON (必须严格遵守此格式，不要包含任何解释文字，直接输出 JSON 对象)：
     {
       "inputs": {
         "currentPrice": 数字,
@@ -65,16 +65,24 @@ export const fetchCompanyData = async (query: string) => {
     });
 
     const text = response.text || "";
+    // 尝试更宽泛的 JSON 匹配
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI 返回格式错误");
+    if (!jsonMatch) {
+      console.log("AI Raw Response:", text);
+      throw new Error(text.length > 50 ? text.substring(0, 50) + "..." : "AI 未能按格式返回数据，可能未找到该公司信息。");
+    }
     
-    const result = JSON.parse(jsonMatch[0]);
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map(chunk => ({
-      title: chunk.web?.title || "官方披露",
-      uri: chunk.web?.uri || "#"
-    })) || [];
+    try {
+      const result = JSON.parse(jsonMatch[0]);
+      const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks?.map(chunk => ({
+        title: chunk.web?.title || "官方披露",
+        uri: chunk.web?.uri || "#"
+      })) || [];
 
-    return { data: result, sources };
+      return { data: result, sources };
+    } catch (parseError) {
+      throw new Error("数据解析失败，请尝试更精确的公司全称。");
+    }
   });
 };
 
