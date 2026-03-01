@@ -43,7 +43,10 @@ const App: React.FC = () => {
         setResults(res);
         setActiveTab('results');
       }
-    } catch (e) { alert("抓取财务数据失败，请手动录入或核对公司名称。"); }
+    } catch (e: any) { 
+      console.error(e);
+      alert(`抓取失败: ${e.message || "未知错误"}。请核对公司名或稍后再试。`); 
+    }
     finally { setIsSearching(false); }
   };
 
