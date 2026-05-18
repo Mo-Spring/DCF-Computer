@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import InputSection from './components/InputSection';
 import ResultsView from './components/ResultsView';
@@ -43,9 +42,9 @@ const App: React.FC = () => {
         setResults(res);
         setActiveTab('results');
       }
-    } catch (e: any) { 
+    } catch (e: any) {
       console.error(e);
-      alert(`抓取失败: ${e.message || "未知错误"}。请核对公司名或稍后再试。`); 
+      alert(`抓取失败: ${e.message || "未知错误"}。请核对公司名或稍后再试。`);
     }
     finally { setIsSearching(false); }
   };
@@ -65,7 +64,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col pb-24 max-w-[100vw] overflow-x-hidden">
       {/* 顶部标题栏 */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 h-16 flex items-center px-6 sticky top-0 z-[100] premium-shadow">
+      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center px-6 sticky top-0 z-[100] premium-shadow" style={{ paddingTop: 'max(1rem, var(--sat))', height: 'calc(4rem + max(0px, var(--sat)))' }}>
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-slate-900 rounded-[1rem] flex items-center justify-center shadow-xl shadow-slate-900/20 rotate-3 transition-transform hover:rotate-0">
             <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
@@ -93,7 +92,7 @@ const App: React.FC = () => {
               <div className="w-20 h-20 bg-indigo-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-inner shadow-indigo-100/50">
                 <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
               </div>
-              
+
               <h3 className="text-xl font-black text-slate-950 mb-4 tracking-tight">AI 深度审计与风险洞察</h3>
               <p className="text-sm text-slate-500 font-medium leading-relaxed mb-10 max-w-[280px] mx-auto">
                 针对 <span className="text-indigo-600 font-bold">{results.companyType}</span> 的资产特质，我们将从宏观环境及财务指标钩稽关系进行深度扫描。
@@ -104,9 +103,9 @@ const App: React.FC = () => {
                   {aiAnalysis}
                 </div>
               ) : (
-                <button 
-                  onClick={runPressureTest} 
-                  disabled={isLoading} 
+                <button
+                  onClick={runPressureTest}
+                  disabled={isLoading}
                   className="w-full bg-slate-950 text-white font-black py-6 rounded-3xl shadow-2xl hover:bg-indigo-600 active:scale-[0.98] transition-all text-xs uppercase tracking-[0.3em] group flex justify-center items-center gap-3"
                 >
                   {isLoading ? (
@@ -123,7 +122,7 @@ const App: React.FC = () => {
       </main>
 
       {/* 底部导航栏 */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-2xl border-t border-slate-100 px-10 py-4 flex justify-around items-center z-[100] h-20 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)]">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-2xl border-t border-slate-100 px-10 flex justify-around items-center z-[100] shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.05)]" style={{ paddingBottom: 'var(--sab)', height: 'calc(5rem + var(--sab))' }}>
         <TabButton active={activeTab === 'input'} onClick={() => setActiveTab('input')} label="数据录入" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7c-2 0-3 1-3 3zm12-4v4m-8-4v4m-4 8h16"/></svg>} />
         <TabButton active={activeTab === 'results'} onClick={() => { if(results) setActiveTab('results') }} label="估值看板" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>} disabled={!results} />
         <TabButton active={activeTab === 'analysis'} onClick={() => { if(results) setActiveTab('analysis') }} label="AI 审计" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>} disabled={!results} />
@@ -133,8 +132,8 @@ const App: React.FC = () => {
 };
 
 const TabButton: React.FC<{ active: boolean; onClick: () => void; label: string; icon: React.ReactNode; disabled?: boolean }> = ({ active, onClick, label, icon, disabled }) => (
-  <button 
-    onClick={onClick} 
+  <button
+    onClick={onClick}
     disabled={disabled}
     className={`flex flex-col items-center gap-1.5 transition-all flex-1 py-1 ${disabled ? 'opacity-20 grayscale' : ''} ${active ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
   >
